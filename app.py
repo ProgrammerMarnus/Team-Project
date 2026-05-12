@@ -4,7 +4,7 @@ from time import sleep
 
 app = Flask(__name__)
 
-# Hardware setup
+# Hardware setup for breadboard
 led = LED()
 buzzer = Buzzer()
 
