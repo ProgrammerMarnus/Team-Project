@@ -4,17 +4,17 @@ from time import sleep
 
 app = Flask(__name__)
 
-# Initialize hardware components
 led = LED(17)
 buzzer = Buzzer(27)
 
-# Ensure everything is off at the start
 led.off()
 buzzer.off()
 
 history = []
 
-# Morse code
+# 🔊 toggles
+sound_enabled = True
+led_enabled = True   # NEW
 
 MORSE = {
     "A": ".-", "B": "-...", "C": "-.-.",
@@ -33,31 +33,37 @@ MORSE = {
     " ": "/"
 }
 
-# Timing
 DOT = 0.2
 DASH = DOT * 3
 LETTER_GAP = DOT * 3
 WORD_GAP = DOT * 7
 
-# Morse code using LED and Buzzer
-def play_morse(code):
 
+def play_morse(code):
     led.off()
     buzzer.off()
 
     for symbol in code:
 
         if symbol == ".":
-            led.on()
-            buzzer.on()
+            if led_enabled:
+                led.on()
+            if sound_enabled:
+                buzzer.on()
+
             sleep(DOT)
+
             led.off()
             buzzer.off()
 
         elif symbol == "-":
-            led.on()
-            buzzer.on()
+            if led_enabled:
+                led.on()
+            if sound_enabled:
+                buzzer.on()
+
             sleep(DASH)
+
             led.off()
             buzzer.off()
 
@@ -72,26 +78,48 @@ def play_morse(code):
     led.off()
     buzzer.off()
 
-# Convert text to Morse code
+
 def to_morse(text):
+    text = text.strip()
+    if not text:
+        return None
+
     result = []
+
     for c in text.upper():
         if c in MORSE:
             result.append(MORSE[c])
+
+    if not result:
+        return None
+
     return " ".join(result)
 
-# Flask routes
+
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == "POST":
-        text = request.form.get("text", "")
-        morse = to_morse(text)
-        
-        play_morse(morse)
+    global sound_enabled
+
+    status = "idle"
 
     if request.method == "POST":
-        text = request.form["message"]
+        text = request.form.get("message", "").strip()
+
+        if not text:
+            return render_template("index.html",
+                                   history=history,
+                                   status="error: empty input",
+                                   sound_enabled=sound_enabled,
+                                   led_enabled=led_enabled)
+
         morse = to_morse(text)
+
+        if not morse:
+            return render_template("index.html",
+                                   history=history,
+                                   status="error: invalid input",
+                                   sound_enabled=sound_enabled,
+                                   led_enabled=led_enabled)
 
         play_morse(morse)
 
@@ -100,22 +128,52 @@ def index():
             "morse": morse
         })
 
-        return render_template("index.html", history=history, status="done")
+        status = "done"
 
-    return render_template("index.html", history=history, status="idle")
+    return render_template("index.html",
+                           history=history,
+                           status=status,
+                           sound_enabled=sound_enabled,
+                           led_enabled=led_enabled)
 
-# replay
+
 @app.route("/replay/<int:i>")
 def replay(i):
     if 0 <= i < len(history):
         play_morse(history[i]["morse"])
     return redirect(url_for("index"))
 
-# clear history
+
+@app.route("/delete/<int:i>")
+def delete(i):
+    if 0 <= i < len(history):
+        history.pop(i)
+    return redirect(url_for("index"))
+
+
 @app.route("/clear")
 def clear():
     global history
     history = []
+    return redirect(url_for("index"))
+
+
+@app.route("/sound")
+def toggle_sound():
+    global sound_enabled
+    sound_enabled = not sound_enabled
+    return redirect(url_for("index"))
+
+
+# 🔆 NEW LED TOGGLE
+@app.route("/led")
+def toggle_led():
+    global led_enabled
+    led_enabled = not led_enabled
+
+    if not led_enabled:
+        led.off()
+
     return redirect(url_for("index"))
 
 

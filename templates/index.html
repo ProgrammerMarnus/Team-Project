@@ -1,136 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- top name -->
-    <meta charset="UTF-8">
-    <title>Morse System</title>
-   
-    <!-- looks maxing -->
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            text-align: center;
-            background: linear-gradient(135deg, #dff3d8, #b7e4c7, #95d5b2);
-            color: #1f2d1f;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+<meta charset="UTF-8">
+<title>Morse System</title>
 
-        header {
-            background: rgba(255,255,255,0.6);
-            padding: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            border-bottom: 2px solid #7fbf7f;
-        }
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    text-align: center;
+    background: linear-gradient(135deg, #dff3d8, #b7e4c7, #95d5b2);
+    color: #1f2d1f;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-        main {
-            flex: 1;
-        }
+header {
+    background: rgba(255,255,255,0.6);
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    border-bottom: 2px solid #7fbf7f;
+}
 
-        input[type="text"] {
-            padding: 12px;
-            width: 260px;
-            border-radius: 10px;
-            border: 1px solid #7fbf7f;
-        }
+main { flex: 1; }
 
-        input[type="submit"] {
-            padding: 12px 18px;
-            border: none;
-            border-radius: 10px;
-            background: #5aa469;
-            color: white;
-        }
+input[type="text"] {
+    padding: 12px;
+    width: 260px;
+    border-radius: 10px;
+    border: 1px solid #7fbf7f;
+}
 
-        .status {
-            margin-top: 10px;
-            font-weight: bold;
-        }
+input[type="submit"] {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #5aa469;
+    color: white;
+}
 
-        .box {
-            margin-top: 20px;
-        }
+.status {
+    margin-top: 10px;
+    font-weight: bold;
+}
 
-        .item {
-            background: rgba(255,255,255,0.75);
-            margin: 10px auto;
-            padding: 12px;
-            width: 70%;
-            border-radius: 12px;
-        }
+.box {
+    margin-top: 20px;
+}
 
-        .btn {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 6px 10px;
-            background: #4c8f5c;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-        }
+.item {
+    background: rgba(255,255,255,0.75);
+    margin: 10px auto;
+    padding: 12px;
+    width: 70%;
+    border-radius: 12px;
+}
 
-        footer {
-            background: rgba(255,255,255,0.6);
-            padding: 12px;
-            font-size: 14px;
-            border-top: 2px solid #7fbf7f;
-        }
-    </style>
+.btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #4c8f5c;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.btn-danger {
+    background: #c0392b;
+}
+
+footer {
+    background: rgba(255,255,255,0.6);
+    padding: 12px;
+    font-size: 14px;
+    border-top: 2px solid #7fbf7f;
+}
+</style>
 </head>
 
 <body>
 
-    <!-- header and title -->
 <header>
-    Morse Code System
+Morse Code System
 </header>
 
 <main>
 
-    <!-- main title -->
 <h1>Convert & Transmit</h1>
 
-<!-- form for input -->
 <form method="POST">
-    <input type="text" name="message" placeholder="Enter message">
+    <input type="text" name="message" placeholder="Enter message (letters/numbers only)" required>
     <input type="submit" value="Send">
 </form>
 
-<!-- status of the system -->
 <div class="status">
-    Status:
-    {% if status == "done" %}
-        ✔ Done
-    {% else %}
-        🟢 Idle
-    {% endif %}
+Status:
+{% if status == "done" %}
+✔ Done
+{% elif "error" in status %}
+❌ {{ status }}
+{% else %}
+🟢 Idle
+{% endif %}
+</div>
+
+<div class="status">
+Sound:
+{% if sound_enabled %}
+🔊 ON
+{% else %}
+🔇 MUTED
+{% endif %}
+</div>
+
+<div class="status">
+LED:
+{% if led_enabled %}
+💡 ON
+{% else %}
+⚫ OFF
+{% endif %}
 </div>
 
 <br>
-<!-- link to clear history -->
-<a href="/clear">Clear history</a>
+
+<a class="btn" href="/clear">Clear All</a>
+
+<a class="btn" href="/sound">
+{% if sound_enabled %}
+Mute Sound 🔇
+{% else %}
+Enable Sound 🔊
+{% endif %}
+</a>
+
+<a class="btn" href="/led">
+{% if led_enabled %}
+Turn LED OFF 💡
+{% else %}
+Turn LED ON ⚫
+{% endif %}
+</a>
 
 <div class="box">
 
-    {% for item in history %}
-        <div class="item">
-            <b>Text:</b> {{ item.text }} <br>
-            <b>Morse:</b> {{ item.morse }} <br>
+{% for item in history %}
+    <div class="item">
+        <b>Text:</b> {{ item.text }} <br>
+        <b>Morse:</b> {{ item.morse }} <br>
 
-            <a class="btn" href="/replay/{{ loop.index0 }}">Replay</a>
-        </div>
-    {% endfor %}
+        <a class="btn" href="/replay/{{ loop.index0 }}">Replay</a>
+        <a class="btn btn-danger" href="/delete/{{ loop.index0 }}">Delete</a>
+    </div>
+{% endfor %}
 
 </div>
 
 </main>
-<!-- footer with credits -->
 
 <footer>
-    © 2026 Morse System Project | Made by Herman, Marnus, Tyrone & Skhulile
+© 2026 Morse System Project | Made by Herman, Marnus, Tyrone & Skhulile
 </footer>
 
 </body>
