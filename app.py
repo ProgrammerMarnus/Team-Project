@@ -4,15 +4,15 @@ from time import sleep
 
 app = Flask(__name__)
 
-# Hardware setup for breadboard
+# Hardware
 led = LED(2)
 buzzer = Buzzer(3)
 
-# Make sure everything starts OFF
+# Always start OFF
 led.off()
 buzzer.off()
 
-# Morse Code form Google
+# Morse Code table
 MORSE = {
     "A": ".-", "B": "-...", "C": "-.-.",
     "D": "-..", "E": ".", "F": "..-.",
@@ -30,7 +30,7 @@ MORSE = {
     " ": "/"
 }
 
-# Timing form unigenie
+# Timing
 DOT = 0.2
 DASH = DOT * 3
 INTRA_GAP = DOT
@@ -45,49 +45,67 @@ def text_to_morse(text):
         if char in MORSE:
             morse_code += MORSE[char] + " "
 
+    print("\nTEXT → MORSE:", morse_code.strip())
     return morse_code.strip()
 
 
 def play_morse(morse_code):
 
+    led.off()
+    buzzer.off()
+
+    print("\n--- STARTING MORSE ---\n")
+
     for symbol in morse_code:
 
         if symbol == ".":
+            print("DOT  •")
             led.on()
             buzzer.on()
-            print("dot")
-
             sleep(DOT)
-
             led.off()
             buzzer.off()
 
         elif symbol == "-":
+            print("DASH —")
             led.on()
             buzzer.on()
-            print("dash")
-
             sleep(DASH)
-
             led.off()
             buzzer.off()
 
         elif symbol == " ":
-            print("letter gap")
+            print("LETTER GAP (space)")
             sleep(LETTER_GAP)
 
         elif symbol == "/":
-            print("word gap")
+            print("WORD GAP")
             sleep(WORD_GAP)
 
         sleep(INTRA_GAP)
 
-    # FORCE everything OFF
     led.off()
     buzzer.off()
 
-    print("Finished - LED and buzzer OFF")
+    print("\n--- FINISHED (ALL OFF) ---\n")
 
 
-# Test
-play_morse(text_to_morse("s"))
+# Flask
+@app.route('/', methods=['GET', 'POST'])
+def index():
+
+    morse_code = ""
+
+    if request.method == 'POST':
+        text = request.form['text']
+
+        print("\nINPUT TEXT:", text)
+
+        morse_code = text_to_morse(text)
+        play_morse(morse_code)
+
+    return render_template('index.html', morse_code=morse_code)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
