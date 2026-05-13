@@ -1,14 +1,21 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from gpiozero import LED, Buzzer
 from time import sleep
 
 app = Flask(__name__)
 
-# Hardware setup for breadboard
-led = LED(4)
-buzzer = Buzzer(3)
+# Initialize hardware components
+led = LED(17)
+buzzer = Buzzer(27)
 
-# Morse Code form Google
+# Ensure everything is off at the start
+led.off()
+buzzer.off()
+
+history = []
+
+# Morse code
+
 MORSE = {
     "A": ".-", "B": "-...", "C": "-.-.",
     "D": "-..", "E": ".", "F": "..-.",
@@ -29,33 +36,18 @@ MORSE = {
 # Timing
 DOT = 0.2
 DASH = DOT * 3
-INTRA_GAP = DOT
 LETTER_GAP = DOT * 3
 WORD_GAP = DOT * 7
 
-
-def text_to_morse(text):
-    morse_code = ""
-
-    for char in text.upper():
-        if char in MORSE:
-            morse_code += MORSE[char] + " "
-
-    print("\nTEXT → MORSE:", morse_code.strip())
-    return morse_code.strip()
-
-
-def play_morse(morse_code):
+# Morse code using LED and Buzzer
+def play_morse(code):
 
     led.off()
     buzzer.off()
 
-    print("\n--- STARTING MORSE ---\n")
-
-    for symbol in morse_code:
+    for symbol in code:
 
         if symbol == ".":
-            print("DOT  •")
             led.on()
             buzzer.on()
             sleep(DOT)
@@ -63,7 +55,6 @@ def play_morse(morse_code):
             buzzer.off()
 
         elif symbol == "-":
-            print("DASH —")
             led.on()
             buzzer.on()
             sleep(DASH)
@@ -71,15 +62,25 @@ def play_morse(morse_code):
             buzzer.off()
 
         elif symbol == " ":
-            print("LETTER GAP (space)")
             sleep(LETTER_GAP)
 
         elif symbol == "/":
-            print("WORD GAP")
             sleep(WORD_GAP)
 
-        sleep(INTRA_GAP)
+        sleep(DOT)
 
+    led.off()
+    buzzer.off()
+
+# Convert text to Morse code
+def to_morse(text):
+    result = []
+    for c in text.upper():
+        if c in MORSE:
+            result.append(MORSE[c])
+    return " ".join(result)
+
+# Flask routes
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -88,9 +89,35 @@ def index():
         
         play_morse(morse)
 
-        return render_template("index.html", morse=morse)
+    if request.method == "POST":
+        text = request.form["message"]
+        morse = to_morse(text)
 
-    return render_template("index.html", morse="")
+        play_morse(morse)
+
+        history.append({
+            "text": text,
+            "morse": morse
+        })
+
+        return render_template("index.html", history=history, status="done")
+
+    return render_template("index.html", history=history, status="idle")
+
+# replay
+@app.route("/replay/<int:i>")
+def replay(i):
+    if 0 <= i < len(history):
+        play_morse(history[i]["morse"])
+    return redirect(url_for("index"))
+
+# clear history
+@app.route("/clear")
+def clear():
+    global history
+    history = []
+    return redirect(url_for("index"))
+
 
 if __name__ == "__main__":
     app.run(debug=False)

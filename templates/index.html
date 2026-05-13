@@ -1,28 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    #top name 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Morse Code Converter</title>
-</head>
-<body>
-    {% block content %}
+    <title>Morse System</title>
+   
+    #looks maxing
     <style>
-    body {
-        background-color: beige;
-    }
+        body {
+            margin: 0;
+            font-family: Arial;
+            text-align: center;
+            background: linear-gradient(135deg, #dff3d8, #b7e4c7, #95d5b2);
+            color: #1f2d1f;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(255,255,255,0.6);
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 2px solid #7fbf7f;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            width: 260px;
+            border-radius: 10px;
+            border: 1px solid #7fbf7f;
+        }
+
+        input[type="submit"] {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #5aa469;
+            color: white;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .box {
+            margin-top: 20px;
+        }
+
+        .item {
+            background: rgba(255,255,255,0.75);
+            margin: 10px auto;
+            padding: 12px;
+            width: 70%;
+            border-radius: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: #4c8f5c;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        footer {
+            background: rgba(255,255,255,0.6);
+            padding: 12px;
+            font-size: 14px;
+            border-top: 2px solid #7fbf7f;
+        }
     </style>
-    <h1>Morse Green</h1>
-    <div style="text-align: center;">
-    <form method="POST">
-    <input type="text" name="text" placeholder="Enter message">
-    <input type="submit" value="Convert">
-    </form>
-    {% if morse %}
-    <p>{{ morse }}</p>
+</head>
+
+<body>
+
+    #header and title
+<header>
+    Morse Code System
+</header>
+
+<main>
+
+    #main title
+<h1>Convert & Transmit</h1>
+
+#form for input
+<form method="POST">
+    <input type="text" name="message" placeholder="Enter message">
+    <input type="submit" value="Send">
+</form>
+
+#status of the system
+<div class="status">
+    Status:
+    {% if status == "done" %}
+        ✔ Done
+    {% else %}
+        🟢 Idle
     {% endif %}
-    </div>
-    {% endblock %}
+</div>
+
+<br>
+#link to clear history
+<a href="/clear">Clear history</a>
+
+<div class="box">
+
+    {% for item in history %}
+        <div class="item">
+            <b>Text:</b> {{ item.text }} <br>
+            <b>Morse:</b> {{ item.morse }} <br>
+
+            <a class="btn" href="/replay/{{ loop.index0 }}">Replay</a>
+        </div>
+    {% endfor %}
+
+</div>
+
+</main>
+#footer with credits
+
+<footer>
+    © 2026 Morse System Project | Made by Herman, Marnus, Tyrone & Skhulile
+</footer>
 
 </body>
 </html>
