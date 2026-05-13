@@ -32,3 +32,10 @@ DASH = DOT * 3
 INTRA_GAP = DOT
 LETTER_GAP = DOT * 3
 WORD_GAP = DOT * 7
+
+def text_to_morse(text):
+    morse_code = ""
+    for char in text.upper():
+        if char in MORSE:
+            morse_code += MORSE[char] + " "
+    return morse_code.strip()
