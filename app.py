@@ -85,7 +85,7 @@ def to_morse(text):
 def index():
     if request.method == "POST":
         text = request.form.get("text", "")
-        morse = text_to_morse(text)
+        morse = to_morse(text)
         
         play_morse(morse)
 
