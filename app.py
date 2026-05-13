@@ -4,15 +4,11 @@ from time import sleep
 
 app = Flask(__name__)
 
-# Hardware
-led = LED(2)
+# Hardware setup for breadboard
+led = LED(4)
 buzzer = Buzzer(3)
 
-# Always start OFF
-led.off()
-buzzer.off()
-
-# Morse Code table
+# Morse Code form Google
 MORSE = {
     "A": ".-", "B": "-...", "C": "-.-.",
     "D": "-..", "E": ".", "F": "..-.",
@@ -84,28 +80,17 @@ def play_morse(morse_code):
 
         sleep(INTRA_GAP)
 
-    led.off()
-    buzzer.off()
-
-    print("\n--- FINISHED (ALL OFF) ---\n")
-
-
-# Flask
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "POST":
+        text = request.form.get("text", "")
+        morse = text_to_morse(text)
+        
+        play_morse(morse)
 
-    morse_code = ""
+        return render_template("index.html", morse=morse)
 
-    if request.method == 'POST':
-        text = request.form['text']
+    return render_template("index.html", morse="")
 
-        print("\nINPUT TEXT:", text)
-
-        morse_code = text_to_morse(text)
-        play_morse(morse_code)
-
-    return render_template('index.html', morse_code=morse_code)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=False)
