@@ -33,6 +33,8 @@ MORSE = {
     " ": "/"
 }
 
+REVERSE_MORSE = {v: k for k, v in MORSE.items()}
+
 DOT = 0.2
 DASH = DOT * 3
 LETTER_GAP = DOT * 3
@@ -95,6 +97,16 @@ def to_morse(text):
 
     return " ".join(result)
 
+def morse_to_text(morse_code):
+    words = morse_code.strip().split(" / ")
+    decoded_words = []
+    for word in words:
+        letters = word.split()
+        decoded_letters = [REVERSE_MORSE.get(letter) for letter in letters]
+        decoded_words.append("".join(decoded_letters))
+    result = " ".join(decoded_words)
+    return result
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -105,28 +117,36 @@ def index():
     if request.method == "POST":
         text = request.form.get("message", "").strip()
 
-        if not text:
-            return render_template("index.html",
-                                   history=history,
-                                   status="error: empty input",
-                                   sound_enabled=sound_enabled,
-                                   led_enabled=led_enabled)
+        if text[0] in [".","-"]:
+            result = morse_to_text(text)
+            
+            history.append({
+            "text": result,
+            "morse": text
+                        })
+        else:
+            if not text:
+                return render_template("index.html",
+                                    history=history,
+                                    status="error: empty input",
+                                    sound_enabled=sound_enabled,
+                                    led_enabled=led_enabled)
 
-        morse = to_morse(text)
+            morse = to_morse(text)
 
-        if not morse:
-            return render_template("index.html",
-                                   history=history,
-                                   status="error: invalid input",
-                                   sound_enabled=sound_enabled,
-                                   led_enabled=led_enabled)
+            if not morse:
+                return render_template("index.html",
+                                    history=history,
+                                    status="error: invalid input",
+                                    sound_enabled=sound_enabled,
+                                    led_enabled=led_enabled)
 
-        play_morse(morse)
+            play_morse(morse)
 
-        history.append({
+            history.append({
             "text": text,
             "morse": morse
-        })
+                        })
 
         status = "done"
 
