@@ -1,1 +1,118 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Code Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> <!-- Optional: Add a custom font -->
+</head>
+<body>
+    {% block content %}
+    <style>
+    body {
+        background: linear-gradient(135deg, #057851e0 0%, #b7940af0 100%); /* Gradient background for depth */
+        font-family: 'Georgia', sans-serif; /* Custom font*/
+        color: #0a4725; /* Dark green text for Morse theme */
+        margin: 0;
+        padding: 30px;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    h1 {
+        font-size: 80px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Shadow for emphasis under h1 title */
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    h2{
+        font-size: 20px;
+        text-shadow: none;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    
+    .container {
+        background: transparent; /* transparent background */
+        border-radius: 8px;
+        box-shadow: 0 8px 16px rgb(30, 13, 13); /* Shadow for depth */
+        padding: 30px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    form {
+        margin-bottom: 5px;
+    }
+    
+    input[type="text"] {
+        width: 80%;
+        padding: 10px;
+        font-size: 20px;
+        border: 2px solid #01431f;
+        border-radius: 8px;
+        margin-right: 10px;
+        transition: border-color 0.3s ease; /* Smooth transition */
+    }
+    
+    input[type="text"]:focus {      /* focus is responsible when the tab is clicked it should change color */
+        border-color: #0f680f; /* Darker green on focus */
+        outline: none;
+    }
+    
+    input[type="submit"] {
+        padding: 12px 20px;
+        font-size: 20px;
+        background-color: #2e8b57;
+        color: white;   /* "Convert" text color */
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    input[type="submit"]:hover {
+        background-color: #074007; /* Darker green on hover */
+    }
+    
+    p {
+        font-size: 20px;
+        font-weight: bold;
+        background: #a5c3de; /* Light blue background for Morse output */
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 5px solid #1f6b40; /* Accent border */
+        margin-top: 20px;
+    }
+    
+    /* Decorative Morse code pattern */
+    .morse-decor {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 2em;
+        color: rgba(46, 139, 87, 0.3);
+        pointer-events: none;
+    }
+    
+    .morse-decor::before {
+        content: ".-. --- .-."; /* Morse for "Morse" */
+    }
+    </style>
+    
+    <div class="morse-decor"></div> <!-- Decorative element -->
+    <h1>Morse Green </h1>
+    <h2>Morse Code Translater</h2>
+    <div class="container">
+        <form method="POST">
+            <input type="text" name="message" placeholder="Enter message">
+            <input type="submit" value="Convert">
+        </form>
+        <p></p>
+    </div>
+</body>
+</html>
